@@ -26,6 +26,15 @@ class Game {
         }
     };
 
+    updateDisplay2(cell, row, column) {
+        const field = this.board[row][column];
+        if (field === 'O') {
+            cell.classList.add('circle');
+        } else if (field === 'X') {
+            cell.classList.add('cross');
+        }
+    }
+
     clearDisplay(cells) {
         for (const cell of cells) {
             cell.classList.remove('circle');
@@ -129,11 +138,11 @@ document.addEventListener("DOMContentLoaded", function() {
     gameboard.addEventListener('click', function(event) {
         const cell = event.target.closest('.cell');
         display.textContent = `Player's ${game.currentPlayer + 1} move`;
-        const index = cell.getAttribute('data-index');
+        setTimeout(() => {
+            const index = cell.getAttribute('data-index');
         const [row, column] = game.getCoordinates(index);
-        const fieldIsEmpty = game.isFieldEmpty(row, column);
-        if (fieldIsEmpty) {
-            console.log('Field is empty');
+
+        if (game.isFieldEmpty(row, column)) {
             game.updateArray(row, column);
             game.updateDisplay(cells);
 
@@ -142,19 +151,21 @@ document.addEventListener("DOMContentLoaded", function() {
                 setTimeout(() => {
                     game.reset(cells);
                     display.textContent = `Player's ${game.currentPlayer + 1} move`;
-                }, 1500);
+                }, 1000);
             } else {
                 if (game.checkGameOver()) { 
                     display.textContent = `Draw!`;
                     setTimeout(() => {
                         game.reset(cells);
                         display.textContent = `Player's ${game.currentPlayer + 1} move`;
-                    }, 1500);
+                    }, 1000);
                 } else {
                     game.updateTurn();
                     display.textContent = `Player's ${game.currentPlayer + 1} move`;
                 }
             }
         }
+        }, 300);
+        
     });
 });

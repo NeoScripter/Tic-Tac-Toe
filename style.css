@@ -7,35 +7,61 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    gap: 20px;
+    gap: 5px;
+    background-color: rgb(20, 189, 172);
+    font-family: system-ui;
 }
 
 .gameboard {
-    width: 200px;
-    height: 200px;
+    width: min(300px, 100%);
+    aspect-ratio: 1 / 1;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
 }
 
 .cell {
-    border: 1px solid black;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
+    z-index: 10;
+    cursor: pointer;
 }
+
+.cell[data-index='4'] {
+    border: 5px solid rgb(13, 160, 145);
+}
+
+.cell[data-index='1'],
+.cell[data-index='7'] {
+    border-inline: 5px solid rgb(13, 160, 145);
+}
+
+.cell[data-index='3'],
+.cell[data-index='5'] {
+    border-block: 5px solid rgb(13, 160, 145);
+}
+
 
 .cell.cross::before {
     content: '✘';
-    font-size: 90px;
+    font-size: 16vmin;
     position: absolute;
     transform: translateY(-4%);
+    color: rgb(148, 32, 32);
 }
 
 .cell.circle::before {
     content: '౦︎';
-    font-size: 90px;
+    font-size: 16vmin;
     position: absolute;
     color: black;
     transform: translateY(-9%);
+    color: rgb(242, 235, 211);
+}
+
+.display-panel {
+    color: rgb(74, 74, 74);
+    font-weight: 700;
+    font-size: 25px;
 }
