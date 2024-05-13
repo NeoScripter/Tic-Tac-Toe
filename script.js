@@ -1,48 +1,67 @@
 'use strict'
 
-const readline = require('readline');
-
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-
-const Game = {
-    board: Array.from({ length: 3}, () => Array(3).fill('.')),
-
-    players: {1: 'X', 2: 'O'},
-
-    currentPlayer: 0,
+class Game {
+    constructor() {
+        this.board = Array.from({ length: 3 }, () => Array(3).fill('.'));
+        this.players = {1: 'X', 2: 'O'};
+        this.currentPlayer = 0;
+        this.attributeMap = {0: '0 0', 1: '0 1', 2: '0 2', 3: '1 0', 4: '1 1', 5: '1 2', 6: '2 0', 7: '2 1', 8: '2 2'};
+    };
 
     updateTurn() {
         this.currentPlayer = (this.currentPlayer + 1) % 2;
-    },
+    };
 
-    printBoard() {
-        this.board.forEach(row => {
-            console.log(row.join(' '));
-        })
-    },
+    updateDisplay(cells) {
+        let currentIndex = 0;
+        for (const row of this.board) {
+            for (const field of row) {
+                if (field === 'O') {
+                    cells[currentIndex].classList.add('circle');
+                } else if (field === 'X') {
+                    cells[currentIndex].classList.add('cross');
+                }
+                currentIndex++;
+            }
+        }
+    };
+
+    clearDisplay(cells) {
+        for (const cell of cells) {
+            cell.classList.remove('circle');
+            cell.classList.remove('cross');
+        }
+    }
+
+    getCoordinates(attribute) {
+        const coordinates = this.attributeMap[attribute];
+        const [row, column] = coordinates.split(' ').map(Number);
+        return [row, column];
+    }
+
+    updateArray(row, column) {
+        this.setValue(row, column, this.players[this.currentPlayer + 1]);
+    };
 
     setValue(row, col, value) {
-        this.board[row - 1][col - 1] = value;
-    },
+        this.board[row][col] = value;
+    };
 
     isFieldEmpty(row, col) {
-        if (this.board[row - 1][col - 1] === '.') {
+        if (this.board[row][col] === '.') {
             return true;
         } else {
             return false;
         }
-    },
+    };
 
-    fillBoard(value) {
-        for (let y = 1; y <= 3; y++) {
-            for (let x = 1; x <= 3; x++) {
-                this.setValue(x, y, value);
+    clearBoard() {
+        for (let y = 0; y < 3; y++) {
+            for (let x = 0; x < 3; x++) {
+                this.setValue(x, y, '.');
             }
         }
-    },
+    };
 
     checkRows() {
         let notWinnerRows = 0;
@@ -57,7 +76,7 @@ const Game = {
             }
         }
         return (notWinnerRows === 3) ? false : true;
-    },
+    };
 
     checkColumns() {
         let notWinnerColumns = 0;
@@ -72,7 +91,7 @@ const Game = {
             }
         }
         return (notWinnerColumns === 3) ? false : true;
-    },
+    };
 
     checkDiagonals() {
         const center = this.board[1][1];
@@ -80,76 +99,62 @@ const Game = {
             return false;
         }
         return (center === this.board[0][0] && center === this.board[2][2]) ||
-               (center === this.board[0][2] && center === this.board[2][0]);
-    },
+            (center === this.board[0][2] && center === this.board[2][0]);
+    };
 
     checklines() {
         return (this.checkDiagonals() || this.checkColumns() || this.checkRows());
-    },
+    };
 
     checkGameOver() {
         return this.board.every(row => {
             return row.every(cell => cell !== '.');
         });
-    },
+    };
 
-    makeMove() {
-        console.log(`Player's ${this.currentPlayer + 1} move`);
-        rl.question('Please enter the position of your move in the format (row, column): ', (input) => {
-            const [row, column] = input.split(' ').map(Number);
-        
-            if (this.isFieldEmpty(row, column)) {
-                this.setValue(row, column, this.players[this.currentPlayer + 1]);
-                this.updateTurn();
-                this.printBoard();
-                if (this.checklines()) {
-                    console.log(`Player's ${this.currentPlayer + 1} wins!`);
-                    rl.close();
-                } else {
-                    if (!this.checkGameOver()) { 
-                        this.makeMove();
-                    } else {
-                        console.log("Draw!");
-                        rl.close();
-                    }
-                }
-            } else {
-                this.makeMove();
-            }
-        });
-    }
+    reset(cells) {
+        this.clearBoard();
+        this.clearDisplay(cells);
+        this.currentPlayer = 0;
+    };
 }
 
-/* Game.setValue(1, 2, '4');
-Game.setValue(2, 2, '4');
-Game.setValue(3, 2, '4');
-Game.fillBoard('.');
-console.log(Game.setValue(2, 1, '.'));
-Game.printBoard();
-console.log(Game.checklines());
-console.log(Game.checkGameEnd()); */
+document.addEventListener("DOMContentLoaded", function() {
+    const game = new Game();
 
-Game.makeMove();
+    const gameboard = document.querySelector('.gameboard');
+    const cells = gameboard.querySelectorAll('.cell');
+    const display = document.querySelector('.display-panel');
 
-/* function checkLine() {
-    let notWinnerColumns = 0;
-    for (let y = 0; y < 3; y++) {
-        let previousElement;
-        for (let x = 0; x < 2; x++) {
-            previousElement = this.board[x][y];
-            if (previousElement !== this.board[x + 1][y] || previousElement === '.') {
-                notWinnerColumns++;
-                break;
+    gameboard.addEventListener('click', function(event) {
+        const cell = event.target.closest('.cell');
+        display.textContent = `Player's ${game.currentPlayer + 1} move`;
+        const index = cell.getAttribute('data-index');
+        const [row, column] = game.getCoordinates(index);
+        const fieldIsEmpty = game.isFieldEmpty(row, column);
+        if (fieldIsEmpty) {
+            console.log('Field is empty');
+            game.updateArray(row, column);
+            game.updateDisplay(cells);
+
+            if (game.checklines()) {
+                display.textContent = `Player ${game.currentPlayer + 1} wins!`;
+                setTimeout(() => {
+                    game.reset(cells);
+                    display.textContent = `Player's ${game.currentPlayer + 1} move`;
+                }, 1500);
+            } else {
+                if (game.checkGameOver()) { 
+                    display.textContent = `Draw!`;
+                    setTimeout(() => {
+                        game.reset(cells);
+                        display.textContent = `Player's ${game.currentPlayer + 1} move`;
+                    }, 1500);
+                } else {
+                    game.updateTurn();
+                    display.textContent = `Player's ${game.currentPlayer + 1} move`;
+                }
             }
         }
-    }
-    return (notWinnerColumns === 3) ? false : true;
-} 
-
-checkRows() {
-        return this.board.some(row => {
-            const first = row[0];
-            return first !== '.' && row.every(cell => cell === first);
-        });
-    },
-    */
+    });
+});

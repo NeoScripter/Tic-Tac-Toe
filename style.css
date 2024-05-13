@@ -1,0 +1,41 @@
+* {
+    box-sizing: border-box;
+}
+.wrapper {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.gameboard {
+    width: 200px;
+    height: 200px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.cell {
+    border: 1px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.cell.cross::before {
+    content: '✘';
+    font-size: 90px;
+    position: absolute;
+    transform: translateY(-4%);
+}
+
+.cell.circle::before {
+    content: '౦︎';
+    font-size: 90px;
+    position: absolute;
+    color: black;
+    transform: translateY(-9%);
+}
