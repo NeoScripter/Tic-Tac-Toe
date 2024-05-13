@@ -1,7 +1,22 @@
 'use strict'
 
-const GameBoard = {
+const readline = require('readline');
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+const Game = {
     board: Array.from({ length: 3}, () => Array(3).fill('.')),
+
+    players: {1: 'X', 2: 'O'},
+
+    currentPlayer: 0,
+
+    updateTurn() {
+        this.currentPlayer = (this.currentPlayer + 1) % 2;
+    },
 
     printBoard() {
         this.board.forEach(row => {
@@ -11,6 +26,22 @@ const GameBoard = {
 
     setValue(row, col, value) {
         this.board[row - 1][col - 1] = value;
+    },
+
+    isFieldEmpty(row, col) {
+        if (this.board[row - 1][col - 1] === '.') {
+            return true;
+        } else {
+            return false;
+        }
+    },
+
+    fillBoard(value) {
+        for (let y = 1; y <= 3; y++) {
+            for (let x = 1; x <= 3; x++) {
+                this.setValue(x, y, value);
+            }
+        }
     },
 
     checkRows() {
@@ -54,14 +85,51 @@ const GameBoard = {
 
     checklines() {
         return (this.checkDiagonals() || this.checkColumns() || this.checkRows());
+    },
+
+    checkGameOver() {
+        return this.board.every(row => {
+            return row.every(cell => cell !== '.');
+        });
+    },
+
+    makeMove() {
+        console.log(`Player's ${this.currentPlayer + 1} move`);
+        rl.question('Please enter the position of your move in the format (row, column): ', (input) => {
+            const [row, column] = input.split(' ').map(Number);
+        
+            if (this.isFieldEmpty(row, column)) {
+                this.setValue(row, column, this.players[this.currentPlayer + 1]);
+                this.updateTurn();
+                this.printBoard();
+                if (this.checklines()) {
+                    console.log(`Player's ${this.currentPlayer + 1} wins!`);
+                    rl.close();
+                } else {
+                    if (!this.checkGameOver()) { 
+                        this.makeMove();
+                    } else {
+                        console.log("Draw!");
+                        rl.close();
+                    }
+                }
+            } else {
+                this.makeMove();
+            }
+        });
     }
 }
 
-GameBoard.setValue(1, 2, '4');
-GameBoard.setValue(2, 2, '4');
-GameBoard.setValue(3, 2, '4');
-GameBoard.printBoard();
-console.log(GameBoard.checklines());
+/* Game.setValue(1, 2, '4');
+Game.setValue(2, 2, '4');
+Game.setValue(3, 2, '4');
+Game.fillBoard('.');
+console.log(Game.setValue(2, 1, '.'));
+Game.printBoard();
+console.log(Game.checklines());
+console.log(Game.checkGameEnd()); */
+
+Game.makeMove();
 
 /* function checkLine() {
     let notWinnerColumns = 0;
